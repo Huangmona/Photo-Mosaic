@@ -27,50 +27,27 @@ int main(int argc, char *argv[]){
 }
 */
 
-#include "Data-Loader/data_loader.h"
 #include "inc/bit_field_filter.h"
 #include <iostream>
+#include "Data-Loader/data_loader.h"
+#include "inc/photo_mosaic.h"
+#include <vector>
+#include <string>
+
+using namespace std;
 
 int main() {
-    Data_Loader data_loader;
+    Data_Loader data_loader; 
     
-    // 1. Load gray image
-    int w1;
-    int h1;
-    int **pixels1 = data_loader.Load_Gray("Image-Folder/mnist/img_0.jpg", &w1, &h1);
-    data_loader.Dump_Gray(w1, h1, pixels1, std::string("pixels1.jpg"));
-    //data_loader.Display_Gray_X_Server(w1, h1, pixels1);
-    data_loader.Display_Gray_ASCII(w1, h1, pixels1);
-    data_loader.Display_Gray_CMD("pixels1.jpg");
+    // 使用 Data_Loader 加载小图像的路径
+    vector<string> tile_image_paths;
+    data_loader.List_Directory("Image-Folder/cifar10", tile_image_paths);
 
-    // 2. Load rgb image into gray scale image
-    int w2;
-    int h2;
-    int **pixels2 = data_loader.Load_Gray("Image-Folder/lena.jpg", &w2, &h2);
-    data_loader.Dump_Gray(w2, h2, pixels2, std::string("pixels2.jpg"));
-    //data_loader.Display_Gray_X_Server(w2, h2, pixels2);
-    data_loader.Display_Gray_CMD("pixels2.jpg");
+    // 创建 PhotoMosaic 实例
+    PhotoMosaic mosaic("Image-Folder/1.jpeg", tile_image_paths, 32);
 
-    // 3. Load rgb image
-    int w3;
-    int h3;
-    int ***pixels3 = data_loader.Load_RGB("Image-Folder/cifar10/airplane_0010.png", &w3, &h3);
-    data_loader.Dump_RGB(w3, h3, pixels3, std::string("pixels3.jpg"));
-    //data_loader.Display_RGB_X_Server(w3, h3, pixels3);
-    data_loader.Display_RGB_ASCII(w3, h3, pixels3);
-    data_loader.Display_RGB_CMD("pixels3.jpg");
-
-    // Load an image using CImg
-    CImg<unsigned char> image("Image-Folder/lena.jpg");
-
-    // Define the filter code
-    uint8_t filter_code = SHARPEN | PIXELATE | EXTRACT_LINES | BLUR;
-
-    // Apply filters
-    CImg<unsigned char> filtered_image = applyFilters(image, filter_code);
-
-    // Save the result
-    filtered_image.save("filtered_image.jpg");
+    // 生成照片马赛克
+    mosaic.createMosaic("mosaic_output.png");
 
     return 0;
 }

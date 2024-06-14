@@ -13,7 +13,7 @@ CHECKFLAGS = --leak-check=full -s --show-leak-kinds=all --track-origins=yes
 SRCDIR = src
 OBJDIR = obj
 INCDIR = inc
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
+SRCS = $(wildcard $(SRCDIR)/*.cpp) $(SRCDIR)/photo_mosaic.cpp
 OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
 DEPS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.d,$(SRCS))
 

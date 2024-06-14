@@ -1,14 +1,25 @@
-#ifndef _PHOTO_MOSAIC_H_
-#define _PHOTO_MOSAIC_H_
+#ifndef PHOTO_MOSAIC_H
+#define PHOTO_MOSAIC_H
 
+#include "CImg.h"
 #include <vector>
 #include <string>
-#include "CImg.h"
+
+using namespace std;
 using namespace cimg_library;
 
 class PhotoMosaic {
 public:
-    void createMosaic(const std::vector<std::string>& imageFilenames, const std::string& outputFilename);
+    PhotoMosaic(const string& target_image_path, const vector<string>& tile_image_paths, int tile_size);
+    void createMosaic(const string& output_path);
+
+private:
+    CImg<unsigned char> target_image;
+    vector<CImg<unsigned char>> tile_images;
+    int tile_size;
+
+    CImg<unsigned char> getBestMatchTile(int x, int y);
+    double calculateDiff(const CImg<unsigned char>& img1, const CImg<unsigned char>& img2);
 };
 
-#endif
+#endif // PHOTO_MOSAIC_H
