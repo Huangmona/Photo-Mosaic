@@ -70,3 +70,4 @@ check:
 
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
+

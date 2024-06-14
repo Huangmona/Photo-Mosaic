@@ -37,17 +37,15 @@ int main(int argc, char *argv[]){
 using namespace std;
 
 int main() {
-    Data_Loader data_loader; 
-    
-    // 使用 Data_Loader 加载小图像的路径
-    vector<string> tile_image_paths;
-    data_loader.List_Directory("Image-Folder/cifar10", tile_image_paths);
-
-    // 创建 PhotoMosaic 实例
-    PhotoMosaic mosaic("Image-Folder/1.jpeg", tile_image_paths, 32);
-
-    // 生成照片马赛克
-    mosaic.createMosaic("mosaic_output.png");
-
+    cout << "1"<<endl;
+    const char* filename = "Image-Folder/1.jpeg";
+    cout << "Loading file: " << filename << std::endl;
+    CImg<uint8_t> image;
+    try {
+        image.load(filename);
+    } catch (const cimg_library::CImgIOException& e) {
+        cerr << e.what() << std::endl;
+        return 1;
+    }
     return 0;
 }
