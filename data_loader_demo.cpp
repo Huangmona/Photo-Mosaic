@@ -1,5 +1,6 @@
-#include "data_loader.h"
 #include <vector>
+#include "data_loader.h"
+
 
 int main(){
     Data_Loader data_loader;
@@ -36,4 +37,6 @@ int main(){
     for(const auto &filename : filenames){
         cout << filename << endl;
     }
+
+    return 0;
 }

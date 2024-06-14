@@ -6,12 +6,15 @@
 
 using namespace std;
 
-int main(){
+int main() {
     Image *img1 = new RGBImage();
-    img1->LoadImage("Image-Folder/myphoto.jpg");
-    img1->DumpImage("img1.jpg");
-    img1->Display_CMD(img1);
-    img1->Display_ASCII(img1);
+    string filename = "Image-Folder/myphoto.jpg";
+    string outputFilename = "img1.jpg";
+    
+    img1->LoadImage(filename);
+    img1->DumpImage(outputFilename);
+    img1->Display_CMD();
+    img1->Display_ASCII();
 
     delete img1;
     return 0;

@@ -3,7 +3,7 @@
 
 #define cimg_use_jpeg
 #define cimg_use_png
-#include "CImg.h"
+#include "../third-party/CImg/CImg.h"
 #include <iostream>
 #include <string>
 #include <cassert>
