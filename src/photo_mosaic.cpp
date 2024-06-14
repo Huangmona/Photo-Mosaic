@@ -1,4 +1,4 @@
-#include "photo_mosaic.h"
+#include "../inc/photo_mosaic.h"
 #include <cmath>
 #include <limits>
 

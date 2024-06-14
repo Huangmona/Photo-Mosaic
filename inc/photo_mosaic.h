@@ -1,7 +1,8 @@
 #ifndef PHOTO_MOSAIC_H
 #define PHOTO_MOSAIC_H
 
-#include "CImg.h"
+#include "../third-party/CImg/CImg.h"
+#include "data_loader.h"
 #include <vector>
 #include <string>
 
@@ -17,6 +18,7 @@ private:
     CImg<unsigned char> target_image;
     vector<CImg<unsigned char>> tile_images;
     int tile_size;
+    Data_Loader data_loader;
 
     CImg<unsigned char> getBestMatchTile(int x, int y);
     double calculateDiff(const CImg<unsigned char>& img1, const CImg<unsigned char>& img2);
