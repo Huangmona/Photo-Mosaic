@@ -3,10 +3,8 @@
 
 #include "image.h"
 #include <string>
-#include "CImg.h"
 
 using namespace std;
-using namespace cimg_library;
 
 class RGBImage : public Image {
 private:
@@ -21,8 +19,6 @@ public:
     void DumpImage(string& filename) override;
     void Display_ASCII() override;
     void Display_CMD() override;
-
-    CImg<unsigned char> getCImg() const; // Function to get CImg object from RGBImage
 };
 
 #endif // RGB_IMAGE_H

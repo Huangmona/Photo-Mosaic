@@ -1,7 +1,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#include "data_loader.h"
+#include "../Data-Loader/data_loader.h"
 #include <string>
 
 using namespace std;

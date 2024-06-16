@@ -1,27 +1,32 @@
 #ifndef PHOTO_MOSAIC_H
 #define PHOTO_MOSAIC_H
 
-#include "../third-party/CImg/CImg.h"
-#include "data_loader.h"
+#include "../Data-Loader/data_loader.h"
 #include <vector>
 #include <string>
 
 using namespace std;
-using namespace cimg_library;
 
 class PhotoMosaic {
 public:
-    PhotoMosaic(const string& target_image_path, const vector<string>& tile_image_paths, int tile_size);
+    PhotoMosaic(const string& target_image_path, const vector<string>& tile_image_paths, int tile_size, Data_Loader& data_loader);
+    ~PhotoMosaic();
     void createMosaic(const string& output_path);
 
 private:
-    CImg<unsigned char> target_image;
-    vector<CImg<unsigned char>> tile_images;
+    int*** target_image_rgb;    // RGB图像
+    int width, height;
+    vector<int***> tile_images; // RGB图像
+    vector<int> tile_widths;
+    vector<int> tile_heights;
     int tile_size;
-    Data_Loader data_loader;
+    Data_Loader& data_loader;  // 引用 Data_Loader 对象
 
-    CImg<unsigned char> getBestMatchTile(int x, int y);
-    double calculateDiff(const CImg<unsigned char>& img1, const CImg<unsigned char>& img2);
+    int*** getBestMatchTile(int x, int y);
+    double calculateDiff(int*** img1, int*** img2, int w1, int h1, int x, int y, int w2, int h2);
+    void applyColorCorrection(int*** tile_img, int*** target_rgb, int x, int y, int tile_w, int tile_h);
+    int*** resizeTile(int*** pixels, int old_width, int old_height, int new_width, int new_height);
+    void freePixels(int*** pixels, int width, int height); // 释放RGB图像内存
 };
 
 #endif // PHOTO_MOSAIC_H

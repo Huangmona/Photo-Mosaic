@@ -14,9 +14,9 @@ GrayImage::~GrayImage() {
             delete[] pixels[i];
         }
         delete[] pixels;
+        pixels = nullptr;
     }
 }
-
 bool GrayImage::LoadImage(string& filename) { 
     pixels = data_loader.Load_Gray(filename, &w, &h);
     return pixels != nullptr;
