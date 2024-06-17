@@ -4,21 +4,21 @@
 #include <iostream>
 #include <vector>
 #include <algorithm> // For std::min
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
 PhotoMosaic::PhotoMosaic(const string& target_image_path, const vector<string>& tile_image_paths, int tile_size, Data_Loader& data_loader)
     : tile_size(tile_size), data_loader(data_loader) {
 
-    // 加载目标图像作为 RGB 图像
     target_image_rgb = data_loader.Load_RGB(target_image_path, &width, &height);
     cout << "Loaded target image: " << target_image_path << ", width: " << width << ", height: " << height << endl;
 
-    // 加载瓦片图像
     for (const string& path : tile_image_paths) {
         int tile_w, tile_h;
         int*** tile_img = data_loader.Load_RGB(path, &tile_w, &tile_h);
-        // 调整瓦片图像大小以匹配 tile_size
+
         if (tile_w != tile_size || tile_h != tile_size) {
             int*** resized_tile_img = resizeTile(tile_img, tile_w, tile_h, tile_size, tile_size);
             freePixels(tile_img, tile_w, tile_h);
@@ -27,23 +27,57 @@ PhotoMosaic::PhotoMosaic(const string& target_image_path, const vector<string>& 
             tile_h = tile_size;
         }
         tile_images.push_back(tile_img);
-        tile_widths.push_back(tile_w);
-        tile_heights.push_back(tile_h);
     }
 }
 
+PhotoMosaic::PhotoMosaic(const string& target_image_path, const string& tile_image_path, int tile_size, Data_Loader& data_loader)
+    : tile_size(tile_size), data_loader(data_loader) {
+
+    target_image_rgb = data_loader.Load_RGB(target_image_path, &width, &height);
+    cout << "Loaded target image: " << target_image_path << ", width: " << width << ", height: " << height << endl;
+
+    int tile_width, tile_height;
+    int*** tile_image = data_loader.Load_RGB(tile_image_path, &tile_width, &tile_height);
+    if (tile_width != tile_size || tile_height != tile_size) {
+        int*** resized_tile_img = resizeTile(tile_image, tile_width, tile_height, tile_size, tile_size);
+        freePixels(tile_image, tile_width, tile_height);
+        tile_image = resized_tile_img;
+        tile_width = tile_size;
+        tile_height = tile_size;
+    }
+    vector<int***> tiles;
+    splitImageToTiles(tile_image, tile_width, tile_height, tile_size, tiles);
+    tile_images.insert(tile_images.end(), tiles.begin(), tiles.end());
+    freePixels(tile_image, tile_width, tile_height);
+}
+
 PhotoMosaic::~PhotoMosaic() {
-    // 释放 target_image_rgb 内存
     freePixels(target_image_rgb, width, height);
 
-    // 释放 tile_images 内存
     for (size_t i = 0; i < tile_images.size(); ++i) {
-        freePixels(tile_images[i], tile_widths[i], tile_heights[i]);
+        freePixels(tile_images[i], tile_size, tile_size);
+    }
+}
+
+void PhotoMosaic::splitImageToTiles(int*** image, int image_width, int image_height, int tile_size, vector<int***>& tiles) {
+    for (int y = 0; y < image_height; y += tile_size) {
+        for (int x = 0; x < image_width; x += tile_size) {
+            int*** tile = new int**[tile_size];
+            for (int dy = 0; dy < tile_size; ++dy) {
+                tile[dy] = new int*[tile_size];
+                for (int dx = 0; dx < tile_size; ++dx) {
+                    tile[dy][dx] = new int[3];
+                    for (int c = 0; c < 3; ++c) {
+                        tile[dy][dx][c] = image[y + dy][x + dx][c];
+                    }
+                }
+            }
+            tiles.push_back(tile);
+        }
     }
 }
 
 void PhotoMosaic::createMosaic(const string& output_path) {
-    // 创建马赛克图像
     int mosaic_width = (width / tile_size) * tile_size;
     int mosaic_height = (height / tile_size) * tile_size;
 
@@ -86,11 +120,7 @@ int*** PhotoMosaic::getBestMatchTile(int x, int y) {
 
     for (size_t i = 0; i < tile_images.size(); ++i) {
         int*** tile_img = tile_images[i];
-        int tile_w = tile_widths[i];
-        int tile_h = tile_heights[i];
-
-        // 从目标图像中提取 tile_size 的部分进行比较
-        double diff = calculateDiff(tile_img, target_image_rgb, tile_w, tile_h, x, y, tile_size, tile_size);
+        double diff = calculateDiff(tile_img, target_image_rgb, tile_size, tile_size, x, y, tile_size, tile_size);
         if (diff < min_diff) {
             min_diff = diff;
             best_match_tile = tile_img;
@@ -112,7 +142,6 @@ double PhotoMosaic::calculateDiff(int*** img1, int*** img2, int w1, int h1, int 
 }
 
 void PhotoMosaic::applyColorCorrection(int*** tile_img, int*** target_rgb, int x, int y, int tile_w, int tile_h) {
-    // 计算瓦片图像的颜色均值
     int avg_tile[3] = {0, 0, 0};
     for (int dy = 0; dy < tile_h; ++dy) {
         for (int dx = 0; dx < tile_w; ++dx) {
@@ -121,12 +150,11 @@ void PhotoMosaic::applyColorCorrection(int*** tile_img, int*** target_rgb, int x
             }
         }
     }
-    for (int c = 0; c < 3; ++c) {
+        for (int c = 0; c < 3; ++c) {
         avg_tile[c] /= (tile_w * tile_h);
-        if (avg_tile[c] == 0) avg_tile[c] = 1; // 防止除以零
+        if (avg_tile[c] == 0) avg_tile[c] = 1;
     }
 
-    // 计算目标图像的颜色均值
     int avg_target[3] = {0, 0, 0};
     for (int dy = 0; dy < tile_h; ++dy) {
         for (int dx = 0; dx < tile_w; ++dx) {
@@ -137,10 +165,9 @@ void PhotoMosaic::applyColorCorrection(int*** tile_img, int*** target_rgb, int x
     }
     for (int c = 0; c < 3; ++c) {
         avg_target[c] /= (tile_w * tile_h);
-        if (avg_target[c] == 0) avg_target[c] = 1; // 防止除以零
+        if (avg_target[c] == 0) avg_target[c] = 1;
     }
 
-    // 颜色校正
     for (int dy = 0; dy < tile_h; ++dy) {
         for (int dx = 0; dx < tile_w; ++dx) {
             for (int c = 0; c < 3; ++c) {
@@ -178,3 +205,4 @@ void PhotoMosaic::freePixels(int*** pixels, int width, int height) {
     }
     delete[] pixels;
 }
+

@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-// 定义滤镜标志
 #define FISHEYE 0b00000001
 #define CONTRAST 0b00000010
 #define DUOTONE 0b00000100
